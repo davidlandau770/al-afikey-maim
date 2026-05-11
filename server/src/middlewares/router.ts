@@ -5,8 +5,14 @@ import productsRoutes from "../products/routes/products.routes";
 import bannersRoutes from "../banners/routes/banners.routes";
 import gameItemsRoutes from "../game-items/routes/game-items.routes";
 import authRoutes from "../auth/routes/auth.routes";
+import pool from "../db";
 
 const router = express.Router();
+
+router.get("/api/health", async (_req, res) => {
+  await pool.query("SELECT 1");
+  res.json({ ok: true });
+});
 
 router.use("/api/contact", contactRoutes);
 router.use("/api/orders", ordersRoutes);
