@@ -2,23 +2,9 @@ import { Pool } from "pg";
 import bcrypt from "bcryptjs";
 import { POSTGRES_CONNECTION_STRING, ADMIN_DEFAULT_PASSWORD } from "../helpers/environments";
 
-const url = new URL(POSTGRES_CONNECTION_STRING);
-const dbName = url.pathname.slice(1);
-
-const adminPool = new Pool({ connectionString: POSTGRES_CONNECTION_STRING.replace(url.pathname, "/postgres") });
 const pool = new Pool({ connectionString: POSTGRES_CONNECTION_STRING });
 
 export const init = async (): Promise<void> => {
-  const { rows } = await adminPool.query(
-    "SELECT 1 FROM pg_database WHERE datname = $1",
-    [dbName],
-  );
-  if (rows.length === 0) {
-    await adminPool.query(`CREATE DATABASE "${dbName}"`);
-    console.log(`Database "${dbName}" created`);
-  }
-  await adminPool.end();
-
   await pool.query(`
     CREATE TABLE IF NOT EXISTS products (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
