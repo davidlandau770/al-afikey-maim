@@ -6,6 +6,7 @@ import handleError from "./middlewares/handleServerError";
 import { PORT } from "./helpers/environments";
 import { init as initDb } from "./db";
 
+console.log("CLOUDINARY_URL:", process.env.CLOUDINARY_URL?.replace(/:([^@]+)@/, ":***@"));
 const app = express();
 
 app.use((req, res, next) => {
