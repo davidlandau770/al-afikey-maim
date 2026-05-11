@@ -1,8 +1,9 @@
 import type { Request, Response } from "express";
 import { handleError, CustomError } from "../../utils/handleError";
 import * as service from "../services/products.service";
+import { uploadToCloudinary } from "../../helpers/cloudinary";
 
-export const getProducts = async (req: Request, res: Response): Promise<void> => {
+export const getProducts = async (_req: Request, res: Response): Promise<void> => {
   try {
     res.json(await service.getAll());
   } catch (error) {
@@ -20,6 +21,10 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
     const mainImageFile = files?.image?.[0];
     const extraImageFiles = files?.images ?? [];
+    const [imageUrl, ...extraUrls] = await Promise.all([
+      mainImageFile ? uploadToCloudinary(mainImageFile.buffer) : Promise.resolve(undefined),
+      ...extraImageFiles.map(f => uploadToCloudinary(f.buffer)),
+    ]);
     const product = await service.create({
       name,
       description,
@@ -28,8 +33,8 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
       category,
       featured: featured === "true" || featured === true,
       pages: pages ? Number(pages) : undefined,
-      image: mainImageFile ? `/images/${mainImageFile.filename}` : undefined,
-      images: extraImageFiles.map(f => `/images/${f.filename}`),
+      image: imageUrl,
+      images: extraUrls.filter(Boolean) as string[],
       soldOut: soldOut === "true" || soldOut === true,
       stock: stock !== undefined && stock !== "" ? Number(stock) : undefined,
     });
@@ -46,7 +51,10 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
     const mainImageFile = files?.image?.[0];
     const extraImageFiles = files?.images ?? [];
-    const newExtraImages = extraImageFiles.map(f => `/images/${f.filename}`);
+    const [newImageUrl, ...newExtraUrls] = await Promise.all([
+      mainImageFile ? uploadToCloudinary(mainImageFile.buffer) : Promise.resolve(undefined),
+      ...extraImageFiles.map(f => uploadToCloudinary(f.buffer)),
+    ]);
     const keptImages: string[] = existingImages
       ? (Array.isArray(existingImages) ? existingImages : [existingImages])
       : [];
@@ -58,8 +66,8 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
       ...(category && { category }),
       featured: featured === "true" || featured === true,
       ...(pages && { pages: Number(pages) }),
-      image: mainImageFile ? `/images/${mainImageFile.filename}` : (existingImage ?? undefined),
-      images: [...keptImages, ...newExtraImages],
+      image: newImageUrl ?? (existingImage ?? undefined),
+      images: [...keptImages, ...(newExtraUrls.filter(Boolean) as string[])],
       soldOut: soldOut === "true" || soldOut === true,
       stock: stock !== undefined && stock !== "" ? Number(stock) : undefined,
     });
