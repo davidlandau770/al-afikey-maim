@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: pituach-770-server
+    runtime: node
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: CORS_WHITE_LIST
+        value: '["https://pituach.vercel.app"]'
+      - key: GOOGLE_SHEET_URL
+        sync: false

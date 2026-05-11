@@ -1,0 +1,15 @@
+{
+  "root": [
+    "./src/index.ts",
+    "./src/contact/controllers/contact.controller.ts",
+    "./src/contact/routes/contact.routes.ts",
+    "./src/contact/services/contact.service.ts",
+    "./src/contact/types/contact.types.ts",
+    "./src/helpers/environments.ts",
+    "./src/middlewares/cors.ts",
+    "./src/middlewares/handleservererror.ts",
+    "./src/middlewares/router.ts",
+    "./src/utils/handleerror.ts"
+  ],
+  "version": "6.0.3"
+}
