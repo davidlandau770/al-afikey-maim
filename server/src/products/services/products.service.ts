@@ -74,7 +74,7 @@ export const update = async (
   return rows.length ? toProduct(rows[0]) : null;
 };
 
-export const remove = async (id: string): Promise<boolean> => {
-  const { rowCount } = await pool.query("DELETE FROM products WHERE id = $1", [id]);
-  return (rowCount ?? 0) > 0;
+export const remove = async (id: string): Promise<Product | null> => {
+  const { rows } = await pool.query("DELETE FROM products WHERE id = $1 RETURNING *", [id]);
+  return rows.length ? toProduct(rows[0]) : null;
 };

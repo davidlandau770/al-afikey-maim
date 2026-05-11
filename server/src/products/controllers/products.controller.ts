@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { handleError, CustomError } from "../../utils/handleError";
 import * as service from "../services/products.service";
-import { uploadToCloudinary } from "../../helpers/cloudinary";
+import { uploadToCloudinary, deleteFromCloudinary } from "../../helpers/cloudinary";
 
 export const getProducts = async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -81,7 +81,10 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
 export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
   try {
     const id = String(req.params.id);
-    if (!(await service.remove(id))) throw new CustomError("מוצר לא נמצא", 404, "PRODUCTS");
+    const deleted = await service.remove(id);
+    if (!deleted) throw new CustomError("מוצר לא נמצא", 404, "PRODUCTS");
+    const urls = [deleted.image, ...(deleted.images ?? [])].filter(Boolean) as string[];
+    await Promise.allSettled(urls.map(deleteFromCloudinary));
     res.json({ message: "המוצר נמחק בהצלחה" });
   } catch (error) {
     handleError(res, error, 500, "PRODUCTS");

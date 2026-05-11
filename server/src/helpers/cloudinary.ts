@@ -12,3 +12,8 @@ export const uploadToCloudinary = (buffer: Buffer): Promise<string> =>
     );
     Readable.from(buffer).pipe(stream);
   });
+
+export const deleteFromCloudinary = async (url: string): Promise<void> => {
+  const publicId = url.match(/\/upload\/(?:v\d+\/)?(.+)\.[^.]+$/)?.[1];
+  if (publicId) await cloudinary.uploader.destroy(publicId);
+};
