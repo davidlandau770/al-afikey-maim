@@ -24,6 +24,8 @@ import GamesPage from "./games/page/GamesPage";
 import TestimonialsPage from "./testimonials/page/TestimonialsPage";
 import { VITE_API_URL } from "./helpers/environments";
 
+axios.defaults.baseURL = VITE_API_URL;
+
 // Attach stored token to every request automatically
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem("admin_token");
@@ -32,7 +34,6 @@ axios.interceptors.request.use((config) => {
 });
 
 const App = () => {
-  console.log(VITE_API_URL);
 
   return (
     <BrowserRouter>
