@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: pituach-770-server
+    name: al-afikey-maim-server
     runtime: node
     rootDir: server
     buildCommand: npm install && npm run build
@@ -9,6 +9,14 @@ services:
       - key: NODE_ENV
         value: production
       - key: CORS_WHITE_LIST
-        value: '["https://pituach.vercel.app"]'
+        value: '["https://al-afikey-maim.vercel.app/"]'
+      - key: POSTGRES_CONNECTION_STRING
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: ADMIN_DEFAULT_PASSWORD
+        sync: false
+      - key: SITE_URL
+        value: afikey-books.co.il
       - key: GOOGLE_SHEET_URL
         sync: false
