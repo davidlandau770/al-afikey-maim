@@ -1,47 +1,6 @@
-import crypto from "crypto";
-import { SITE_URL, YAAD_MASOF, YAAD_KEY } from "../../helpers/environments";
+import { SITE_URL } from "../../helpers/environments";
 import { sendOrderToSheetDAL } from "../dal/orders.dal";
 import type { OrderBody } from "../types/order.types";
-
-function buildPaymentUrl(order: OrderBody, orderNumber: number): string {
-  const amount = order.total.toFixed(2);
-  const orderStr = String(orderNumber);
-  const signature = crypto
-    .createHash("sha256")
-    .update(YAAD_MASOF + YAAD_KEY + amount + orderStr)
-    .digest("hex");
-
-  const nameParts = order.customer.name.trim().split(/\s+/);
-  const clientName = order.customer.name.trim();
-  const clientLName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : nameParts[0];
-
-  const params = new URLSearchParams({
-    Amount:      amount,
-    BOF:         "True",
-    ClientLName: clientLName,
-    ClientName:  clientName,
-    Coin:        "1",
-    Info:        `הזמנה ${orderNumber}`,
-    Masof:       YAAD_MASOF,
-    MoreData:    "True",
-    Order:       orderStr,
-    PageLang:    "HEB",
-    Sign:        "True",
-    Tash:        "1",
-    UTF8:        "True",
-    action:      "pay",
-    cell:        order.customer.phone,
-    city:        order.shipping.city || "",
-    email:       order.customer.email,
-    sendemail:   "False",
-    street:      order.shipping.street || "",
-    tmp:         "3",
-    zip:         order.customer.zip || "",
-    signature,
-  });
-
-  return `https://icom.yaad.net/cgi-bin/yaadpay/yaadpay3ds.pl?${params.toString()}`;
-}
 
 export const createOrderService = async (order: OrderBody): Promise<string> => {
   const siteName = "על אפיקי מים";
@@ -93,5 +52,5 @@ export const createOrderService = async (order: OrderBody): Promise<string> => {
     clientEmailHtml,
   });
 
-  return buildPaymentUrl(order, orderNumber);
+  return "";
 };
