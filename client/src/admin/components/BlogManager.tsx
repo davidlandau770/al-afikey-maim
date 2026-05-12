@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import {
   Box, Button, TextField, Typography, IconButton, Card, CardContent,
-  Dialog, DialogTitle, DialogContent, DialogActions, Divider, Tooltip,
+  Dialog, DialogTitle, DialogContent, DialogActions, Divider, Tooltip, Alert,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -223,6 +223,7 @@ const BlogManager = () => {
   const [form, setForm] = useState(emptyForm);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const load = useCallback(async () => {
     const { data } = await axios.get<BlogPost[]>('/api/blog');
@@ -237,8 +238,12 @@ const BlogManager = () => {
     setImageFile(null); setEditingId(p.id); setDialogOpen(true);
   };
 
+  const hasContent = (html: string) => html.replace(/<[^>]+>/g, '').trim().length > 0;
+
   const handleSave = async () => {
-    if (!form.title.trim() || !form.content || form.content === '<p></p>') return;
+    setSaveError('');
+    if (!form.title.trim()) { setSaveError('חובה להזין כותרת'); return; }
+    if (!hasContent(form.content)) { setSaveError('חובה להזין תוכן לכתבה'); return; }
     setSaving(true);
     try {
       const fd = new FormData();
@@ -250,6 +255,9 @@ const BlogManager = () => {
       else await axios.post('/api/blog', fd);
       setDialogOpen(false);
       load();
+    } catch (err: unknown) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.message : undefined;
+      setSaveError(msg || 'שגיאה בשמירה, נסה שוב');
     } finally {
       setSaving(false);
     }
@@ -310,7 +318,7 @@ const BlogManager = () => {
               <Box component="img"
                 src={imageFile ? URL.createObjectURL(imageFile) : form.image}
                 alt="תצוגה מקדימה"
-                sx={{ width: '100%', maxHeight: 200, objectFit: 'cover', borderRadius: 1, mb: 1 }}
+                sx={{ maxWidth: '100%', maxHeight: 160, objectFit: 'contain', display: 'block', borderRadius: 1, mb: 1 }}
               />
             )}
             <Button variant="outlined" component="label" size="small">
@@ -328,6 +336,7 @@ const BlogManager = () => {
             />
           </Box>
         </DialogContent>
+        {saveError && <Alert severity="error" sx={{ mx: 3, mb: 1 }}>{saveError}</Alert>}
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)}>ביטול</Button>
           <Button variant="contained" onClick={handleSave} disabled={saving}>

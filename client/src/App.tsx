@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import axios from "axios";
 import { CartProvider } from "./context/CartContext";
 import { ProductsProvider } from "./context/ProductsContext";
@@ -25,21 +26,37 @@ import TestimonialsPage from "./testimonials/page/TestimonialsPage";
 import BlogPage from "./blog/page/BlogPage";
 import BlogPostPage from "./blog/page/BlogPostPage";
 import { VITE_API_URL } from "./helpers/environments";
+import { useAuth } from "./auth/context/AuthContext";
 
 axios.defaults.baseURL = VITE_API_URL;
 
-// Attach stored token to every request automatically
 axios.interceptors.request.use((config) => {
   const token = localStorage.getItem("admin_token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-const App = () => {
+const AuthInterceptor = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+  useEffect(() => {
+    const id = axios.interceptors.response.use(
+      res => res,
+      err => {
+        if (err.response?.status === 401) { logout(); navigate("/login"); }
+        return Promise.reject(err);
+      }
+    );
+    return () => axios.interceptors.response.eject(id);
+  }, [logout, navigate]);
+  return null;
+};
 
+const App = () => {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <AuthInterceptor />
         <ProductsProvider>
           <CartProvider>
             <BannersProvider>
