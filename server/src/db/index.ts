@@ -63,6 +63,16 @@ export const init = async (): Promise<void> => {
   `);
   await pool.query(`ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'admin'`);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS blog_posts (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      image TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+
   const { rows: adminRows } = await pool.query("SELECT 1 FROM admin_users WHERE role = 'owner'");
   if (adminRows.length === 0) {
     const { rowCount } = await pool.query("UPDATE admin_users SET role = 'owner' WHERE username = 'admin'");

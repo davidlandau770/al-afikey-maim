@@ -5,6 +5,7 @@ import productsRoutes from "../products/routes/products.routes";
 import bannersRoutes from "../banners/routes/banners.routes";
 import gameItemsRoutes from "../game-items/routes/game-items.routes";
 import authRoutes from "../auth/routes/auth.routes";
+import blogRoutes from "../blog/routes/blog.routes";
 import pool from "../db";
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.use("/api/products", productsRoutes);
 router.use("/api/banners", bannersRoutes);
 router.use("/api/game-items", gameItemsRoutes);
 router.use("/api/auth", authRoutes);
+router.use("/api/blog", blogRoutes);
 
 export default router;

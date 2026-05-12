@@ -12,6 +12,7 @@ import DeleteConfirmDialog from '../components/DeleteConfirmDialog';
 import BannerManager from '../components/BannerManager';
 import GamesManager from '../components/GamesManager';
 import UsersManager from '../components/UsersManager';
+import BlogManager from '../components/BlogManager';
 
 const AdminPage = () => {
   const { logout } = useAuth();
@@ -57,6 +58,7 @@ const AdminPage = () => {
         <Tab label="מוצרים" />
         <Tab label="באנרים" />
         <Tab label="משחקים" />
+        <Tab label="בלוג" />
         <Tab label="משתמשים" />
       </Tabs>
 
@@ -85,7 +87,8 @@ const AdminPage = () => {
 
       {tab === 1 && <BannerManager />}
       {tab === 2 && <GamesManager />}
-      {tab === 3 && <UsersManager />}
+      {tab === 3 && <BlogManager />}
+      {tab === 4 && <UsersManager />}
 
       <Snackbar
         open={snackbar.open} autoHideDuration={3500}

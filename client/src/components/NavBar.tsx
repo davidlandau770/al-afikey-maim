@@ -32,6 +32,7 @@ const NavBar = () => {
     { label: "חנות", path: "/products" },
     { label: "משחקים", path: "/games" },
     { label: "המלצות", path: "/testimonials" },
+    { label: "בלוג", path: "/blog" },
     { label: "אודות", path: "/about" },
   ];
 

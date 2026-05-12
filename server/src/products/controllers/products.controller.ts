@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { handleError, CustomError } from "../../utils/handleError";
 import * as service from "../services/products.service";
-import { uploadToCloudinary, deleteFromCloudinary } from "../../helpers/cloudinary";
+import { uploadToCloudinary, deleteFromCloudinary, FOLDERS } from "../../helpers/cloudinary";
 
 export const getProducts = async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -22,8 +22,8 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
     const mainImageFile = files?.image?.[0];
     const extraImageFiles = files?.images ?? [];
     const [imageUrl, ...extraUrls] = await Promise.all([
-      mainImageFile ? uploadToCloudinary(mainImageFile.buffer) : Promise.resolve(undefined),
-      ...extraImageFiles.map(f => uploadToCloudinary(f.buffer)),
+      mainImageFile ? uploadToCloudinary(mainImageFile.buffer, FOLDERS.shop) : Promise.resolve(undefined),
+      ...extraImageFiles.map(f => uploadToCloudinary(f.buffer, FOLDERS.shop)),
     ]);
     const product = await service.create({
       name,
@@ -52,8 +52,8 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     const mainImageFile = files?.image?.[0];
     const extraImageFiles = files?.images ?? [];
     const [newImageUrl, ...newExtraUrls] = await Promise.all([
-      mainImageFile ? uploadToCloudinary(mainImageFile.buffer) : Promise.resolve(undefined),
-      ...extraImageFiles.map(f => uploadToCloudinary(f.buffer)),
+      mainImageFile ? uploadToCloudinary(mainImageFile.buffer, FOLDERS.shop) : Promise.resolve(undefined),
+      ...extraImageFiles.map(f => uploadToCloudinary(f.buffer, FOLDERS.shop)),
     ]);
     const keptImages: string[] = existingImages
       ? (Array.isArray(existingImages) ? existingImages : [existingImages])

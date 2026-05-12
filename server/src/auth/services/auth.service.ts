@@ -29,7 +29,7 @@ export const login = async (username: string, password: string): Promise<{ token
   if (!valid) throw new Error("שם משתמש או סיסמה שגויים");
 
   const role: string = rows[0].role;
-  const token = jwt.sign({ username, role }, JWT_SECRET, { expiresIn: "12h" });
+  const token = jwt.sign({ username, role }, JWT_SECRET, { expiresIn: "4h" });
   return { token, role, username };
 };
 

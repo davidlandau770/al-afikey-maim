@@ -22,6 +22,8 @@ import AccessibilityPage from "./info/page/AccessibilityPage";
 import PrivacyPage from "./info/page/PrivacyPage";
 import GamesPage from "./games/page/GamesPage";
 import TestimonialsPage from "./testimonials/page/TestimonialsPage";
+import BlogPage from "./blog/page/BlogPage";
+import BlogPostPage from "./blog/page/BlogPostPage";
 import { VITE_API_URL } from "./helpers/environments";
 
 axios.defaults.baseURL = VITE_API_URL;
@@ -64,6 +66,8 @@ const App = () => {
                 <Route path="/privacy" element={<PrivacyPage />} />
                 <Route path="/games" element={<GamesPage />} />
                 <Route path="/testimonials" element={<TestimonialsPage />} />
+                <Route path="/blog" element={<BlogPage />} />
+                <Route path="/blog/:id" element={<BlogPostPage />} />
               </Routes>
               <Footer />
               <WhatsAppFab />
