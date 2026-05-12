@@ -7,6 +7,8 @@ export interface AdminUser {
   id: string;
   username: string;
   role: "owner" | "admin";
+  phone?: string;
+  email?: string;
   createdAt: string;
 }
 
@@ -15,6 +17,8 @@ const toUser = (row: any): AdminUser => ({
   id: row.id,
   username: row.username,
   role: row.role,
+  phone: row.phone ?? undefined,
+  email: row.email ?? undefined,
   createdAt: row.created_at,
 });
 
@@ -47,13 +51,13 @@ export const getAll = async (includeOwner: boolean): Promise<AdminUser[]> => {
   return rows.map(toUser);
 };
 
-export const createUser = async (username: string, password: string): Promise<AdminUser> => {
+export const createUser = async (username: string, password: string, phone?: string, email?: string): Promise<AdminUser> => {
   const existing = await pool.query("SELECT 1 FROM admin_users WHERE username = $1", [username]);
   if (existing.rows.length > 0) throw new Error("שם המשתמש כבר קיים");
   const hash = await bcrypt.hash(password, 12);
   const { rows } = await pool.query(
-    "INSERT INTO admin_users (username, password_hash, role) VALUES ($1, $2, 'admin') RETURNING id, username, role, created_at",
-    [username, hash],
+    "INSERT INTO admin_users (username, password_hash, role, phone, email) VALUES ($1, $2, 'admin', $3, $4) RETURNING *",
+    [username, hash, phone ?? null, email ?? null],
   );
   return toUser(rows[0]);
 };
@@ -61,6 +65,14 @@ export const createUser = async (username: string, password: string): Promise<Ad
 export const resetPassword = async (id: string, newPassword: string): Promise<void> => {
   const hash = await bcrypt.hash(newPassword, 12);
   await pool.query("UPDATE admin_users SET password_hash = $1 WHERE id = $2", [hash, id]);
+};
+
+export const updateUser = async (id: string, phone?: string, email?: string): Promise<AdminUser | null> => {
+  const { rows } = await pool.query(
+    "UPDATE admin_users SET phone = $1, email = $2 WHERE id = $3 AND role != 'owner' RETURNING *",
+    [phone ?? null, email ?? null, id],
+  );
+  return rows.length > 0 ? toUser(rows[0]) : null;
 };
 
 export const deleteUser = async (id: string): Promise<boolean> => {

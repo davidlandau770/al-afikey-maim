@@ -53,7 +53,7 @@ const BlogPostPage = () => {
 
       {post.image && (
         <Box component="img" src={post.image} alt={post.title}
-          sx={{ width: "100%", maxHeight: 400, objectFit: "cover", borderRadius: 2, mb: 4 }} />
+          sx={{ width: "100%", height: "auto", borderRadius: 2, mb: 4 }} />
       )}
 
       <Box

@@ -73,10 +73,10 @@ const Footer = () => {
   return (
     <Box component="footer" sx={{ bgcolor: '#2C3E50', color: 'white', pt: 5, pb: 3, mt: 8 }}>
       <Container maxWidth="lg">
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 5, mb: 4, alignItems: 'flex-start' }}>
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 3, md: 5 }, mb: 4, alignItems: 'flex-start' }}>
 
           {/* Contact details */}
-          <Box sx={{ minWidth: 190 }}>
+          <Box sx={{ minWidth: { md: 190 }, width: { xs: '100%', md: 'auto' } }}>
             <Typography variant="h6" fontWeight={700} sx={{ color: '#4A9BB5', mb: 1.5 }}>
               על אפיקי מים
             </Typography>
@@ -107,7 +107,7 @@ const Footer = () => {
           </Box>
 
           {/* Nav — centered in remaining space */}
-          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: { xs: 'flex-start', md: 'center' } }}>
             <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>
               ניווט מהיר
             </Typography>

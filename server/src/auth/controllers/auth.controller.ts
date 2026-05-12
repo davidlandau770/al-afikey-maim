@@ -40,12 +40,17 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
 
 export const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { username, password } = req.body;
+    const { username, password, phone, email } = req.body;
     if (!username?.trim() || !password || String(password).length < 6) {
       res.status(400).json({ message: "שם משתמש וסיסמה (לפחות 6 תווים) חובה" });
       return;
     }
-    const user = await service.createUser(String(username).trim(), String(password));
+    const user = await service.createUser(
+      String(username).trim(),
+      String(password),
+      phone ? String(phone).trim() : undefined,
+      email ? String(email).trim() : undefined,
+    );
     res.status(201).json(user);
   } catch (error) {
     handleError(res, error, 400, "AUTH");
@@ -61,6 +66,21 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
     }
     await service.resetPassword(String(req.params.id), String(newPassword));
     res.json({ message: "הסיסמה אופסה בהצלחה" });
+  } catch (error) {
+    handleError(res, error, 500, "AUTH");
+  }
+};
+
+export const updateUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { phone, email } = req.body;
+    const user = await service.updateUser(
+      String(req.params.id),
+      phone ? String(phone).trim() : undefined,
+      email ? String(email).trim() : undefined,
+    );
+    if (!user) throw new CustomError("משתמש לא נמצא", 404, "AUTH");
+    res.json(user);
   } catch (error) {
     handleError(res, error, 500, "AUTH");
   }

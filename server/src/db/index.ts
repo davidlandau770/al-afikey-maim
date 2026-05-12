@@ -62,6 +62,8 @@ export const init = async (): Promise<void> => {
     )
   `);
   await pool.query(`ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'admin'`);
+  await pool.query(`ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS phone TEXT`);
+  await pool.query(`ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS email TEXT`);
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS blog_posts (

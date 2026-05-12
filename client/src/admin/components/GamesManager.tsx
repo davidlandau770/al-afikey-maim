@@ -267,12 +267,12 @@ const DeleteDialog = ({ open, onClose, onConfirm, loading }: { open: boolean; on
 
 /* ── main component ── */
 const GamesManager = () => {
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState<number | false>(false);
   const [itemsByType, setItemsByType] = useState<Record<string, GameItem[]>>({});
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const gameType = TABS[tab].type;
+  const gameType = tab !== false ? TABS[tab].type : null;
 
   const load = useCallback(async (type: string) => {
     try {
@@ -281,9 +281,10 @@ const GamesManager = () => {
     } catch { /* ignore */ }
   }, []);
 
-  useEffect(() => { load(gameType); }, [gameType, load]);
+  useEffect(() => { if (gameType) load(gameType); }, [gameType, load]);
 
   const handleAdd = async (data: Record<string, unknown>) => {
+    if (!gameType) return;
     await axios.post(`/api/game-items/${gameType}`, data);
     await load(gameType);
   };
@@ -299,7 +300,7 @@ const GamesManager = () => {
     finally { setDeleting(false); }
   };
 
-  const items = itemsByType[gameType] ?? [];
+  const items = gameType ? (itemsByType[gameType] ?? []) : [];
 
   return (
     <Box>
@@ -314,6 +315,9 @@ const GamesManager = () => {
       </Tabs>
 
       <Paper elevation={0} sx={{ p: 3, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+        {tab === false && (
+          <Typography color="text.secondary" textAlign="center" sx={{ py: 3 }}>בחר משחק מהרשימה למעלה</Typography>
+        )}
         {tab === 0 && <MemoryPanel      items={items} onAdd={handleAdd} onDelete={setDeleteTarget} />}
         {tab === 1 && <WordArrangePanel items={items} onAdd={handleAdd} onDelete={setDeleteTarget} />}
         {tab === 2 && <LetterQuizPanel  items={items} onAdd={handleAdd} onDelete={setDeleteTarget} />}
