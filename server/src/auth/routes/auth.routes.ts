@@ -1,11 +1,12 @@
 import express from "express";
-import { login, changePassword, getUsers, createUser, resetPassword, updateUser, deleteUser } from "../controllers/auth.controller";
+import { login, changePassword, getUsers, createUser, resetPassword, updateSelf, updateUser, deleteUser } from "../controllers/auth.controller";
 import { requireAuth, requireOwner } from "../middlewares/requireAuth";
 
 const router = express.Router();
 
 router.post("/login", login);
 router.post("/change-password", requireAuth, changePassword);
+router.patch("/me", requireAuth, updateSelf);
 
 // Both roles can view and add users; only owner can reset password or delete
 router.get("/users", requireAuth, getUsers);

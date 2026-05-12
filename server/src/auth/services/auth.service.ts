@@ -67,6 +67,10 @@ export const resetPassword = async (id: string, newPassword: string): Promise<vo
   await pool.query("UPDATE admin_users SET password_hash = $1 WHERE id = $2", [hash, id]);
 };
 
+export const updateSelf = async (username: string, phone?: string, email?: string): Promise<void> => {
+  await pool.query("UPDATE admin_users SET phone = $1, email = $2 WHERE username = $3", [phone ?? null, email ?? null, username]);
+};
+
 export const updateUser = async (id: string, phone?: string, email?: string): Promise<AdminUser | null> => {
   const { rows } = await pool.query(
     "UPDATE admin_users SET phone = $1, email = $2 WHERE id = $3 AND role != 'owner' RETURNING *",

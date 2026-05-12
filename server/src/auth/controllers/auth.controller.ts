@@ -71,6 +71,20 @@ export const resetPassword = async (req: Request, res: Response): Promise<void> 
   }
 };
 
+export const updateSelf = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { phone, email } = req.body;
+    await service.updateSelf(
+      req.user!.username,
+      phone ? String(phone).trim() : undefined,
+      email ? String(email).trim() : undefined,
+    );
+    res.json({ message: "הפרטים עודכנו" });
+  } catch (error) {
+    handleError(res, error, 500, "AUTH");
+  }
+};
+
 export const updateUser = async (req: Request, res: Response): Promise<void> => {
   try {
     const { phone, email } = req.body;

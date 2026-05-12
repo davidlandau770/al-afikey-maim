@@ -95,8 +95,10 @@ const UsersManager = () => {
   const handleEdit = async () => {
     if (!editUser) return;
     setEditing(true);
+    const isSelf = editUser.username === currentUser;
+    const url = isSelf ? '/api/auth/me' : `/api/auth/users/${editUser.id}`;
     try {
-      await axios.patch(`/api/auth/users/${editUser.id}`, {
+      await axios.patch(url, {
         phone: editPhone.trim() || undefined,
         email: editEmail.trim() || undefined,
       });
@@ -154,7 +156,7 @@ const UsersManager = () => {
               <TableCell sx={{ fontWeight: 700 }}>שם משתמש</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>תפקיד</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>תאריך יצירה</TableCell>
-              {isOwner && <TableCell align="center" sx={{ fontWeight: 700 }}>פעולות</TableCell>}
+              <TableCell align="center" sx={{ fontWeight: 700, width: '1%', whiteSpace: 'nowrap' }}>פעולות</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -174,29 +176,29 @@ const UsersManager = () => {
                     : <Chip label="מנהל" size="small" />}
                 </TableCell>
                 <TableCell>{new Date(u.createdAt).toLocaleDateString('he-IL')}</TableCell>
-                {isOwner && (
-                  <TableCell align="center">
-                    {u.role !== 'owner' && (
-                      <>
-                        <Tooltip title="עריכה">
-                          <IconButton onClick={() => { setEditUser(u); setEditPhone(u.phone ?? ''); setEditEmail(u.email ?? ''); setEditError(''); }}>
-                            <EditIcon />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="איפוס סיסמה">
-                          <IconButton color="primary" onClick={() => { setResetUser(u); setResetPassword(''); setResetError(''); }}>
-                            <LockResetIcon />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="מחיקה">
-                          <IconButton color="error" onClick={() => setDeleteId(u.id)}>
-                            <DeleteIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </>
-                    )}
-                  </TableCell>
-                )}
+                <TableCell align="center" sx={{ whiteSpace: 'nowrap', p: 0.5 }}>
+                  {(u.username === currentUser || (isOwner && u.role !== 'owner')) && (
+                    <Tooltip title="עריכה">
+                      <IconButton onClick={() => { setEditUser(u); setEditPhone(u.phone ?? ''); setEditEmail(u.email ?? ''); setEditError(''); }}>
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {isOwner && u.role !== 'owner' && (
+                    <>
+                      <Tooltip title="איפוס סיסמה">
+                        <IconButton color="primary" onClick={() => { setResetUser(u); setResetPassword(''); setResetError(''); }}>
+                          <LockResetIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="מחיקה">
+                        <IconButton color="error" onClick={() => setDeleteId(u.id)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </>
+                  )}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
