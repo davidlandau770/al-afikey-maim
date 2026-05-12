@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   Box, Typography, Tabs, Tab, Table, TableHead, TableRow, TableCell,
@@ -274,14 +274,20 @@ const GamesManager = () => {
 
   const gameType = tab !== false ? TABS[tab].type : null;
 
-  const load = useCallback(async (type: string) => {
-    try {
-      const { data } = await axios.get<GameItem[]>(`/api/game-items/${type}`);
-      setItemsByType(prev => ({ ...prev, [type]: data }));
-    } catch { /* ignore */ }
-  }, []);
+  const load = (type: string) => {
+    axios.get<GameItem[]>(`/api/game-items/${type}`)
+      .then(({ data }) => setItemsByType(prev => ({ ...prev, [type]: data })))
+      .catch(() => {});
+  };
 
-  useEffect(() => { if (gameType) load(gameType); }, [gameType, load]);
+  useEffect(() => {
+    if (!gameType) return;
+    let active = true;
+    axios.get<GameItem[]>(`/api/game-items/${gameType}`)
+      .then(({ data }) => { if (active) setItemsByType(prev => ({ ...prev, [gameType]: data })); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [gameType]);
 
   const handleAdd = async (data: Record<string, unknown>) => {
     if (!gameType) return;
@@ -294,7 +300,7 @@ const GamesManager = () => {
     setDeleting(true);
     try {
       await axios.delete(`/api/game-items/${deleteTarget}`);
-      await load(gameType);
+      if (gameType) load(gameType);
       setDeleteTarget(null);
     } catch { /* ignore */ }
     finally { setDeleting(false); }

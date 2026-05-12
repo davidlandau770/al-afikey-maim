@@ -45,8 +45,8 @@ export const changePassword = async (username: string, newPassword: string): Pro
 export const getAll = async (includeOwner: boolean): Promise<AdminUser[]> => {
   const { rows } = await pool.query(
     includeOwner
-      ? "SELECT id, username, role, created_at FROM admin_users ORDER BY created_at ASC"
-      : "SELECT id, username, role, created_at FROM admin_users WHERE role != 'owner' ORDER BY created_at ASC",
+      ? "SELECT id, username, role, phone, email, created_at FROM admin_users ORDER BY created_at ASC"
+      : "SELECT id, username, role, phone, email, created_at FROM admin_users WHERE role != 'owner' ORDER BY created_at ASC",
   );
   return rows.map(toUser);
 };

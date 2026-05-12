@@ -112,30 +112,31 @@ const BannerManager = () => {
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: 'background.default' }}>
-              <TableCell>צבע</TableCell>
-              <TableCell>כותרת</TableCell>
-              <TableCell>מיקום</TableCell>
-              <TableCell>סטטוס</TableCell>
+              <TableCell align="center">צבע</TableCell>
+              <TableCell align="center">כותרת</TableCell>
+              <TableCell align="center">מיקום</TableCell>
+              <TableCell align="center">סטטוס</TableCell>
               <TableCell align="center">פעולות</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {banners.map(b => (
               <TableRow key={b.id} hover>
-                <TableCell>
+                <TableCell align="center">
                   <Box sx={{
                     width: 32, height: 32, borderRadius: 1, border: '1px solid', borderColor: 'divider',
                     bgcolor: b.bgColor || 'transparent',
                     backgroundImage: b.bgImage ? `url(${b.bgImage})` : undefined,
                     backgroundSize: 'cover', backgroundPosition: 'center',
+                    mx: 'auto',
                   }} />
                 </TableCell>
-                <TableCell>
+                <TableCell align="center">
                   <Typography fontWeight={600}>{b.title}</Typography>
                   {b.text && <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block', maxWidth: 220 }}>{b.text}</Typography>}
                 </TableCell>
-                <TableCell><Chip label={POSITION_LABELS[b.position] ?? `מיקום ${b.position}`} size="small" /></TableCell>
-                <TableCell>{b.active ? <Chip label="פעיל" color="success" size="small" /> : <Chip label="מושבת" size="small" />}</TableCell>
+                <TableCell align="center"><Chip label={POSITION_LABELS[b.position] ?? `מיקום ${b.position}`} size="small" /></TableCell>
+                <TableCell align="center">{b.active ? <Chip label="פעיל" color="success" size="small" /> : <Chip label="מושבת" size="small" />}</TableCell>
                 <TableCell align="center">
                   <Tooltip title="עריכה"><IconButton color="primary" onClick={() => openEdit(b)}><EditIcon /></IconButton></Tooltip>
                   <Tooltip title="מחיקה"><IconButton color="error" onClick={() => setDeleteId(b.id)}><DeleteIcon /></IconButton></Tooltip>
