@@ -12,6 +12,7 @@ import LetterQuizGame from "../components/LetterQuizGame";
 import HangmanGame from "../components/HangmanGame";
 import JewishQuizGame from "../components/JewishQuizGame";
 import NikudMatchGame from "../components/NikudMatchGame";
+import DageshGame from "../components/DageshGame";
 
 type GameDef = { label: string; emoji: string; desc: string; component: React.ComponentType };
 
@@ -21,6 +22,7 @@ const DIRECT_GAMES: GameDef[] = [
   { label: "איזו אות חסרה?", emoji: "❓", desc: "מלאו את האות החסרה במילה",             component: LetterQuizGame },
   { label: "תלייה",          emoji: "🪢", desc: "נחשו את המילה לפני שהאיש נתלה",       component: HangmanGame },
   { label: "חידון יהודי",    emoji: "🕍", desc: "ענו על שאלות בנושאי יהדות ומסורת",    component: JewishQuizGame },
+  { label: "עם דגש או בלי?", emoji: "בּ",  desc: "זהו האות – בּ/כּ/פּ עם דגש או ב/כ/פ בלי", component: DageshGame },
 ];
 
 const NIKUD_GAMES: GameDef[] = [
