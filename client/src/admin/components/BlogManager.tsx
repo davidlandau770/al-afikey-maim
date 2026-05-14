@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
   Box, Button, TextField, Typography, IconButton, Card, CardContent,
   Dialog, DialogTitle, DialogContent, DialogActions, Divider, Tooltip, Alert,
+  CircularProgress,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
@@ -218,6 +219,7 @@ const TiptapEditor = ({ content, onChange }: { content: string; onChange: (html:
 
 const BlogManager = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -225,12 +227,21 @@ const BlogManager = () => {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
 
-  const load = useCallback(async () => {
-    const { data } = await axios.get<BlogPost[]>('/api/blog');
-    setPosts(data);
-  }, []);
+  const load = () => {
+    axios.get<BlogPost[]>('/api/blog')
+      .then(({ data }) => setPosts(data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  };
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    let active = true;
+    axios.get<BlogPost[]>('/api/blog')
+      .then(({ data }) => { if (active) setPosts(data); })
+      .catch(() => {})
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   const openNew = () => { setForm(emptyForm); setImageFile(null); setEditingId(null); setDialogOpen(true); };
   const openEdit = (p: BlogPost) => {
@@ -281,7 +292,12 @@ const BlogManager = () => {
         </Button>
       </Box>
 
-      {posts.length === 0 && (
+      {loading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
+      )}
+      {!loading && posts.length === 0 && (
         <Typography color="text.secondary" textAlign="center" sx={{ py: 6 }}>אין כתבות עדיין</Typography>
       )}
 
