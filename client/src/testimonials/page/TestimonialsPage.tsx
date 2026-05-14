@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import {
   Box, Container, Typography, Breadcrumbs, Grid, Divider,
-  Dialog, IconButton,
+  Dialog, IconButton, Card, CardContent,
 } from '@mui/material';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import CloseIcon from '@mui/icons-material/Close';
@@ -34,8 +35,19 @@ const navBtn = {
   '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' },
 };
 
+interface Testimonial { id: string; quote: string; name: string; role: string; }
+
 const TestimonialsPage = () => {
-  const [lightbox, setLightbox] = useState<number | null>(null);
+  const [lightbox, setLightbox]   = useState<number | null>(null);
+  const [quotes, setQuotes]       = useState<Testimonial[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    axios.get<Testimonial[]>('/api/testimonials')
+      .then(({ data }) => { if (active) setQuotes(data); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   const prev = () => setLightbox(i => (i! - 1 + images.length) % images.length);
   const next = () => setLightbox(i => (i! + 1) % images.length);
@@ -108,6 +120,38 @@ const TestimonialsPage = () => {
           </IconButton>
         </Box>
       </Dialog>
+
+      {/* Written testimonials */}
+      {quotes.length > 0 && (
+        <>
+          <Divider sx={{ mb: 5 }} />
+          <Typography variant="h5" fontWeight={700} color="primary.dark" sx={{ mb: 3 }}>
+            המלצות בכתב
+          </Typography>
+          <Grid container spacing={3} sx={{ mb: 6 }}>
+            {quotes.map(t => (
+              <Grid item xs={12} md={6} key={t.id}>
+                <Card variant="outlined" sx={{ height: '100%', borderRadius: 3, borderColor: 'primary.light' }}>
+                  <CardContent sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <Typography sx={{ fontSize: '3rem', color: 'primary.main', lineHeight: 1, mb: 1, opacity: 0.3 }}>
+                      "
+                    </Typography>
+                    <Typography variant="body1" sx={{ lineHeight: 1.85, flexGrow: 1, fontStyle: 'italic', mb: 2.5 }}>
+                      {t.quote}
+                    </Typography>
+                    <Box sx={{ borderTop: '1px solid', borderColor: 'divider', pt: 2 }}>
+                      <Typography fontWeight={700} color="primary.dark">{t.name}</Typography>
+                      {t.role && (
+                        <Typography variant="body2" color="text.secondary">{t.role}</Typography>
+                      )}
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </>
+      )}
 
       <Divider sx={{ mb: 5 }} />
 

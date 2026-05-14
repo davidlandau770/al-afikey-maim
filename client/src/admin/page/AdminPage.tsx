@@ -13,6 +13,7 @@ import BannerManager from '../components/BannerManager';
 import GamesManager from '../components/GamesManager';
 import UsersManager from '../components/UsersManager';
 import BlogManager from '../components/BlogManager';
+import TestimonialsManager from '../components/TestimonialsManager';
 
 const AdminPage = () => {
   const { logout } = useAuth();
@@ -59,6 +60,7 @@ const AdminPage = () => {
         <Tab label="באנרים" />
         <Tab label="משחקים" />
         <Tab label="בלוג" />
+        <Tab label="המלצות" />
         <Tab label="משתמשים" />
       </Tabs>
 
@@ -88,7 +90,8 @@ const AdminPage = () => {
       {tab === 1 && <BannerManager />}
       {tab === 2 && <GamesManager />}
       {tab === 3 && <BlogManager />}
-      {tab === 4 && <UsersManager />}
+      {tab === 4 && <TestimonialsManager />}
+      {tab === 5 && <UsersManager />}
 
       <Snackbar
         open={snackbar.open} autoHideDuration={3500}

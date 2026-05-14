@@ -9,6 +9,7 @@ import FaqSection from '../components/FaqSection';
 import TaglineBanner from '../components/TaglineBanner';
 import BannerSlot from '../components/BannerSlot';
 import VideoTeaser from '../components/VideoTeaser';
+import TestimonialsCarousel from '../components/TestimonialsCarousel';
 
 const HomePage = () => {
   const { products } = useProducts();
@@ -35,6 +36,7 @@ const HomePage = () => {
       <FaqSection />
       <BannerSlot position={4} />
       <VideoTeaser />
+      <TestimonialsCarousel />
       <TaglineBanner />
       <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={() => setSnackbarOpen(false)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
         <Alert severity="success" variant="filled" onClose={() => setSnackbarOpen(false)}>

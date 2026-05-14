@@ -44,7 +44,7 @@ const NavBar = () => {
       elevation={2}
       sx={{ bgcolor: "white", color: "text.primary" }}
     >
-      <Toolbar sx={{ gap: 1 }}>
+      <Toolbar sx={{ gap: 0.5 }}>
         {/* המבורגר ראשון בDOM → ימין קיצוני ב-RTL */}
         {isMobile && (
           <>
@@ -101,7 +101,7 @@ const NavBar = () => {
             color: "primary.main",
             fontSize: { xs: "1.1rem", md: "1.35rem" },
             letterSpacing: 0.5,
-            ml: 3,
+            mx: 1,
           }}
         >
           על אפיקי מים
@@ -127,7 +127,9 @@ const NavBar = () => {
                     ? "2px solid"
                     : "2px solid transparent",
                   borderRadius: 0,
+                  px: 1.5,
                   pb: 0.5,
+                  minWidth: 'auto',
                 }}
               >
                 {link.label}
