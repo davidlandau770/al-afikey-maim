@@ -15,11 +15,12 @@ interface GameItem {
 }
 
 const TABS = [
-  { type: 'memory',      label: '🃏 זיכרון' },
-  { type: 'word_arrange',label: '🔤 מסדרים מילה' },
-  { type: 'letter_quiz', label: '❓ אות חסרה' },
-  { type: 'hangman',     label: '🪢 תלייה' },
-  { type: 'jewish_quiz', label: '🕍 חידון יהודי' },
+  { type: 'memory',       label: '🃏 זיכרון' },
+  { type: 'word_arrange', label: '🔤 מסדרים מילה' },
+  { type: 'letter_quiz',  label: '❓ אות חסרה' },
+  { type: 'hangman',      label: '🪢 תלייה' },
+  { type: 'jewish_quiz',  label: '🕍 חידון יהודי' },
+  { type: 'nikud_match',  label: 'אָ קמץ ופתח' },
 ];
 
 /* ── shared item table ── */
@@ -189,7 +190,7 @@ const LetterQuizPanel = ({ items, onAdd, onDelete }: { items: GameItem[]; onAdd:
           {opts.map((o, i) => (
             <TextField key={i} label={`אפשרות ${i + 1}`} size="small" value={o}
               onChange={e => setOpts(prev => prev.map((x, j) => j === i ? e.target.value : x))}
-              sx={{ width: 90 }} inputProps={{ maxLength: 2 }}
+              sx={{ width: 90 }} slotProps={{ htmlInput: { maxLength: 2 } }}
             />
           ))}
           <Button variant="contained" startIcon={<AddIcon />} onClick={save} disabled={saving} sx={{ gap: 1, '& .MuiButton-startIcon': { margin: 0 } }}>
@@ -251,6 +252,111 @@ const JewishQuizPanel = ({ items, onAdd, onDelete }: { items: GameItem[]; onAdd:
   );
 };
 
+const NikudMatchPanel = ({ items, onDelete, onRefresh }: {
+  items: GameItem[];
+  onDelete: (id: string) => void;
+  onRefresh: () => void;
+}) => {
+  const PATACH = 'ַ';
+  const KAMATZ = 'ָ';
+  const [letter, setLetter]   = useState('');
+  const [nikud, setNikud]     = useState<'patach' | 'kamatz'>('patach');
+  const [word, setWord]       = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [err, setErr]         = useState('');
+  const [saving, setSaving]   = useState(false);
+
+  const save = async () => {
+    if (!letter.trim() || !word.trim() || !imageFile) { setErr('כל השדות חובה כולל תמונה'); return; }
+    setSaving(true);
+    const fd = new FormData();
+    fd.append('letter', letter.trim());
+    fd.append('nikud', nikud);
+    fd.append('word', word.trim());
+    fd.append('image', imageFile);
+    try {
+      await axios.post('/api/game-items/nikud_match', fd);
+      setLetter(''); setWord(''); setImageFile(null); setErr('');
+      onRefresh();
+    } catch (e: unknown) {
+      const msg = axios.isAxiosError(e) ? (e.response?.data as { message?: string })?.message : undefined;
+      setErr(msg || 'שגיאה בשמירה');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <>
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+        המשחק מציג עד 6 זוגות אקראיים – קלף אות עם ניקוד וקלף תמונה מתאים. הילד לוחץ להתאמה.
+      </Typography>
+      <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow sx={{ bgcolor: 'background.default' }}>
+              <TableCell sx={{ fontWeight: 700 }}>אות + ניקוד</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>מילה</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>תמונה</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>מחיקה</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {items.map(item => {
+              const d = item.data as { letter: string; nikud: string; imageUrl: string; word: string };
+              const mark = d.nikud === 'patach' ? PATACH : KAMATZ;
+              return (
+                <TableRow key={item.id} hover>
+                  <TableCell sx={{ fontSize: '1.3rem', fontFamily: 'serif' }}>{d.letter + mark}</TableCell>
+                  <TableCell>{d.word}</TableCell>
+                  <TableCell>
+                    <Box component="img" src={d.imageUrl} alt={d.word}
+                      sx={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 1 }} />
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip title="מחק">
+                      <IconButton size="small" color="error" onClick={() => onDelete(item.id)}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+            {items.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4} sx={{ textAlign: 'center', py: 3, color: 'text.secondary' }}>אין פריטים עדיין</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <TextField label="אות" size="small" value={letter}
+          onChange={e => setLetter(e.target.value)} sx={{ width: 80 }}
+          slotProps={{ htmlInput: { maxLength: 2 } }} placeholder="א" />
+        <TextField select label="ניקוד" size="small" value={nikud}
+          onChange={e => setNikud(e.target.value as 'patach' | 'kamatz')} sx={{ width: 130 }}>
+          <MenuItem value="patach">פתח ({`א${PATACH}`})</MenuItem>
+          <MenuItem value="kamatz">קמץ ({`א${KAMATZ}`})</MenuItem>
+        </TextField>
+        <TextField label="מילה" size="small" value={word}
+          onChange={e => setWord(e.target.value)} sx={{ flex: 1, minWidth: 120 }} />
+        <Button variant="outlined" component="label" size="medium" sx={{ whiteSpace: 'nowrap', minWidth: 100 }}>
+          {imageFile ? imageFile.name.slice(0, 10) + (imageFile.name.length > 10 ? '…' : '') : 'העלה תמונה'}
+          <input type="file" accept="image/*" hidden
+            onChange={e => { setImageFile(e.target.files?.[0] ?? null); e.target.value = ''; }} />
+        </Button>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={save} disabled={saving}
+          sx={{ gap: 1, '& .MuiButton-startIcon': { margin: 0 } }}>
+          {saving ? <CircularProgress size={18} color="inherit" /> : 'הוסף'}
+        </Button>
+      </Box>
+      {err && <Alert severity="error" sx={{ mt: 1 }}>{err}</Alert>}
+    </>
+  );
+};
+
 /* ── delete confirm dialog ── */
 const DeleteDialog = ({ open, onClose, onConfirm, loading }: { open: boolean; onClose: () => void; onConfirm: () => void; loading: boolean }) => (
   <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -292,7 +398,7 @@ const GamesManager = () => {
   const handleAdd = async (data: Record<string, unknown>) => {
     if (!gameType) return;
     await axios.post(`/api/game-items/${gameType}`, data);
-    await load(gameType);
+    load(gameType);
   };
 
   const handleDelete = async () => {
@@ -329,6 +435,7 @@ const GamesManager = () => {
         {tab === 2 && <LetterQuizPanel  items={items} onAdd={handleAdd} onDelete={setDeleteTarget} />}
         {tab === 3 && <HangmanPanel     items={items} onAdd={handleAdd} onDelete={setDeleteTarget} />}
         {tab === 4 && <JewishQuizPanel  items={items} onAdd={handleAdd} onDelete={setDeleteTarget} />}
+        {tab === 5 && gameType && <NikudMatchPanel items={items} onDelete={setDeleteTarget} onRefresh={() => load(gameType)} />}
       </Paper>
 
       <DeleteDialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} loading={deleting} />

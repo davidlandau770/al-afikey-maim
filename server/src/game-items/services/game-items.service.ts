@@ -25,6 +25,11 @@ export const create = async (gameType: string, data: any): Promise<GameItem> => 
   return toItem(rows[0]);
 };
 
+export const getById = async (id: string): Promise<GameItem | null> => {
+  const { rows } = await pool.query("SELECT * FROM game_items WHERE id = $1", [id]);
+  return rows.length > 0 ? toItem(rows[0]) : null;
+};
+
 export const remove = async (id: string): Promise<boolean> => {
   const { rowCount } = await pool.query("DELETE FROM game_items WHERE id = $1", [id]);
   return (rowCount ?? 0) > 0;

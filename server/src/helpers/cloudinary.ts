@@ -7,6 +7,7 @@ export const FOLDERS = {
   blog: "al afikey maim/blog",
   documents: "al afikey maim/documents",
   assets: "al afikey maim/assets",
+  games: "al afikey maim/games",
 } as const;
 
 export const uploadToCloudinary = (buffer: Buffer, folder: string): Promise<string> =>
