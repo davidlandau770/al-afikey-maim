@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
-  Typography,
   Button,
   IconButton,
   Badge,
@@ -18,6 +17,7 @@ import {
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useCart } from "../context/CartContext";
+import logo from "../assets/design/לוגו-על-אפיקי-מים.jpg";
 
 const NavBar = () => {
   const { totalItems } = useCart();
@@ -91,21 +91,25 @@ const NavBar = () => {
           </>
         )}
 
-        <Typography
+        <Box
           component={Link}
           to="/"
-          variant="h6"
           sx={{
             flexGrow: isMobile ? 1 : 0,
-            fontWeight: 800,
-            color: "primary.main",
-            fontSize: { xs: "1.1rem", md: "1.35rem" },
-            letterSpacing: 0.5,
-            mx: 1,
+            display: "flex",
+            alignItems: "center",
+            mr: 0.5,
+            ml: { xs: 0.5, md: 3 },
+            textDecoration: "none",
           }}
         >
-          על אפיקי מים
-        </Typography>
+          <Box
+            component="img"
+            src={logo}
+            alt="על אפיקי מים"
+            sx={{ height: { xs: 36, md: 44 }, width: "auto", display: "block" }}
+          />
+        </Box>
 
         {isMobile ? (
           <IconButton component={Link} to="/cart" color="inherit">

@@ -1,24 +1,59 @@
 import { Link } from 'react-router-dom';
 import { Box, Container, Typography, Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import heroImg from '../../assets/design/תמונת-רקע.jpg';
 
 const HeroSection = () => (
   <Box
     sx={{
-      background: 'linear-gradient(150deg, #E3F2F8 0%, #EEF7F4 45%, #F7F4EF 100%)',
-      py: { xs: 8, md: 12 },
       position: 'relative',
       overflow: 'hidden',
-      textAlign: 'center',
+      display: 'flex',
+      alignItems: 'center',
     }}
   >
-    <Box sx={{ position: 'absolute', top: -80, right: -80, width: 350, height: 350, borderRadius: '50%', background: 'rgba(27,107,138,0.09)', pointerEvents: 'none' }} />
-    <Box sx={{ position: 'absolute', bottom: -60, left: -60, width: 280, height: 280, borderRadius: '50%', background: 'rgba(200,144,58,0.09)', pointerEvents: 'none' }} />
+    {/* Full background photo — shown in its entirety */}
+    <Box
+      component="img"
+      src={heroImg}
+      alt=""
+      aria-hidden="true"
+      sx={{
+        width: '100%',
+        display: 'block',
+      }}
+    />
 
-    <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
+    {/* Layered overlay: bottom fade + extra brightening on the right (boy's side) */}
+    <Box
+      sx={{
+        position: 'absolute',
+        inset: 0,
+        background: [
+          'linear-gradient(to left,  rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.10) 50%, rgba(255,255,255,0) 100%)',
+          'linear-gradient(to bottom, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.45) 60%, rgba(255,255,255,0.90) 100%)',
+        ].join(', '),
+        pointerEvents: 'none',
+      }}
+    />
+
+    {/* Text centred over the image */}
+    <Container
+      maxWidth="md"
+      sx={{
+        position: 'absolute',
+        inset: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+        px: { xs: 2, md: 4 },
+      }}
+    >
       <Typography
         variant="h1"
-        sx={{ fontSize: { xs: '2.6rem', md: '4.2rem' }, color: 'primary.dark', mb: 2, letterSpacing: 1 }}
+        sx={{ fontSize: { xs: '2.6rem', md: '4.2rem' }, color: 'primary.dark', mb: 2, letterSpacing: 1, lineHeight: 1.2 }}
       >
         על אפיקי מים
       </Typography>
@@ -29,7 +64,11 @@ const HeroSection = () => (
       >
         ספרים מעוצבים לכל הגילאים
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 5, maxWidth: 500, mx: 'auto', fontStyle: 'italic' }}>
+      <Typography
+        variant="body1"
+        color="text.secondary"
+        sx={{ mb: 5, maxWidth: 500, mx: 'auto', fontStyle: 'italic' }}
+      >
         "וְהָיָה כְּעֵץ שָׁתוּל עַל פַּלְגֵי מָיִם" – תהלים א, ג
       </Typography>
       <Button
@@ -43,12 +82,6 @@ const HeroSection = () => (
         לחנות
       </Button>
     </Container>
-
-    <Box sx={{ position: 'absolute', bottom: -1, left: 0, right: 0 }}>
-      <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: 60 }}>
-        <path d="M0,20 C360,55 1080,0 1440,30 L1440,60 L0,60 Z" fill="#F7F4EF" />
-      </svg>
-    </Box>
   </Box>
 );
 

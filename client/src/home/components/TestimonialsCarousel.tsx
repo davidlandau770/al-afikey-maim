@@ -84,7 +84,7 @@ const TestimonialsCarousel = () => {
         {items.length > 1 && (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1, mt: 4 }}>
             <IconButton onClick={prev} size="small" sx={{ color: 'primary.main' }}>
-              <NavigateBeforeIcon />
+              <NavigateNextIcon />
             </IconButton>
 
             {items.map((_, i) => (
@@ -98,7 +98,7 @@ const TestimonialsCarousel = () => {
             ))}
 
             <IconButton onClick={next} size="small" sx={{ color: 'primary.main' }}>
-              <NavigateNextIcon />
+              <NavigateBeforeIcon />
             </IconButton>
           </Box>
         )}

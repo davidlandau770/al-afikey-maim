@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import {
   Box, Container, Typography, Breadcrumbs, Grid, Divider,
-  Dialog, IconButton, Card, CardContent,
+  Dialog, IconButton, Card, CardContent, useMediaQuery, useTheme,
 } from '@mui/material';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import CloseIcon from '@mui/icons-material/Close';
@@ -26,20 +26,13 @@ const videos = [
   { title: 'המלצה מאת הרב פילו – ת"ת קול רינה', id: 'zKdPtOIxPDQ' },
 ];
 
-const navBtn = {
-  position: 'absolute' as const,
-  top: '50%',
-  transform: 'translateY(-50%)',
-  bgcolor: 'rgba(0,0,0,0.45)',
-  color: 'white',
-  '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' },
-};
-
 interface Testimonial { id: string; quote: string; name: string; role: string; }
 
 const TestimonialsPage = () => {
   const [lightbox, setLightbox]   = useState<number | null>(null);
   const [quotes, setQuotes]       = useState<Testimonial[]>([]);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     let active = true;
@@ -51,6 +44,15 @@ const TestimonialsPage = () => {
 
   const prev = () => setLightbox(i => (i! - 1 + images.length) % images.length);
   const next = () => setLightbox(i => (i! + 1) % images.length);
+
+  const navBtn = {
+    position: 'absolute' as const,
+    top: '50%',
+    transform: 'translateY(-50%)',
+    bgcolor: 'rgba(0,0,0,0.45)',
+    color: 'white',
+    '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' },
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 4, md: 7 } }}>
@@ -68,9 +70,9 @@ const TestimonialsPage = () => {
       <Divider sx={{ mb: 5 }} />
 
       {/* Image grid */}
-      <Grid container spacing={2} sx={{ mb: 6 }}>
+      <Grid container spacing={{ xs: 1.5, md: 2 }} sx={{ mb: 6 }}>
         {images.map((src, i) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
+          <Grid item xs={6} sm={6} md={4} lg={3} key={i}>
             <Box
               component="img"
               src={src}
@@ -95,7 +97,14 @@ const TestimonialsPage = () => {
         open={lightbox !== null}
         onClose={() => setLightbox(null)}
         maxWidth="lg"
-        PaperProps={{ sx: { bgcolor: 'transparent', boxShadow: 'none', overflow: 'visible' } }}
+        PaperProps={{
+          sx: {
+            bgcolor: 'transparent',
+            boxShadow: 'none',
+            overflow: 'visible',
+            m: { xs: 1.5, md: 3 },
+          },
+        }}
       >
         <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {lightbox !== null && (
@@ -107,15 +116,41 @@ const TestimonialsPage = () => {
             />
           )}
 
-          <IconButton onClick={() => setLightbox(null)}
-            sx={{ ...navBtn, position: 'absolute', top: -16, right: -16, transform: 'none' }}>
+          {/* Close */}
+          <IconButton
+            onClick={() => setLightbox(null)}
+            sx={{
+              ...navBtn,
+              position: 'absolute',
+              top: { xs: 8, md: -16 },
+              right: { xs: 8, md: -16 },
+              transform: 'none',
+            }}
+          >
             <CloseIcon />
           </IconButton>
 
-          <IconButton onClick={prev} sx={{ ...navBtn, right: -52 }}>
+          {/* Prev — right side in RTL */}
+          <IconButton
+            onClick={prev}
+            sx={{
+              ...navBtn,
+              right: { xs: 8, md: -52 },
+              ...(isMobile && { top: 'auto', bottom: 8, transform: 'none' }),
+            }}
+          >
             <ArrowForwardIosIcon />
           </IconButton>
-          <IconButton onClick={next} sx={{ ...navBtn, left: -52 }}>
+
+          {/* Next — left side in RTL */}
+          <IconButton
+            onClick={next}
+            sx={{
+              ...navBtn,
+              left: { xs: 8, md: -52 },
+              ...(isMobile && { top: 'auto', bottom: 8, transform: 'none' }),
+            }}
+          >
             <ArrowBackIosNewIcon />
           </IconButton>
         </Box>
@@ -159,7 +194,7 @@ const TestimonialsPage = () => {
       <Typography variant="h5" fontWeight={700} color="primary.dark" sx={{ mb: 3 }}>
         המלצות וידאו
       </Typography>
-      <Grid container spacing={4}>
+      <Grid container spacing={{ xs: 3, md: 4 }}>
         {videos.map((v) => (
           <Grid item xs={12} md={6} key={v.id}>
             <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>{v.title}</Typography>
