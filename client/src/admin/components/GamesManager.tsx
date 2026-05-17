@@ -21,6 +21,7 @@ const TABS = [
   { type: 'hangman',      label: '🪢 תלייה' },
   { type: 'jewish_quiz',  label: '🕍 חידון יהודי' },
   { type: 'nikud_match',  label: 'אָ קמץ ופתח' },
+  { type: 'dagesh',       label: 'בּ עם דגש או בלי?' },
 ];
 
 /* ── shared item table ── */
@@ -357,6 +358,117 @@ const NikudMatchPanel = ({ items, onDelete, onRefresh }: {
   );
 };
 
+const DAGESH_PAIRS = [
+  { value: 'b', label: 'בּ / ב' },
+  { value: 'k', label: 'כּ / כ' },
+  { value: 'p', label: 'פּ / פ' },
+] as const;
+
+const DageshPanel = ({ items, onAdd, onDelete }: { items: GameItem[]; onAdd: (d: Record<string, unknown>) => Promise<void>; onDelete: (id: string) => void }) => {
+  const [word,      setWord]      = useState('');
+  const [pair,      setPair]      = useState<'b' | 'k' | 'p'>('b');
+  const [hasDagesh, setHasDagesh] = useState(true);
+  const [err,       setErr]       = useState('');
+  const [saving,    setSaving]    = useState(false);
+
+  const save = async () => {
+    if (!word.trim()) { setErr('נדרשת מילה'); return; }
+    setSaving(true);
+    try {
+      await onAdd({ word: word.trim(), pair, hasDagesh });
+      setWord(''); setErr('');
+    } catch { setErr('שגיאה בשמירה'); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <>
+      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+        מילים שמורות בבסיס הנתונים מחליפות את ברירות המחדל. ריק = ברירת מחדל מהקוד.
+      </Typography>
+      <TableContainer component={Paper} elevation={0} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 2, mb: 2 }}>
+        <Table size="small">
+          <TableHead>
+            <TableRow sx={{ bgcolor: 'background.default' }}>
+              <TableCell sx={{ fontWeight: 700 }}>מילה</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>זוג אותיות</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>דגש</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>מחיקה</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {items.map(item => {
+              const d = item.data as { word: string; pair: 'b' | 'k' | 'p'; hasDagesh: boolean };
+              const pairInfo = DAGESH_PAIRS.find(p => p.value === d.pair);
+              return (
+                <TableRow key={item.id} hover>
+                  <TableCell sx={{ fontSize: '1.2rem', fontFamily: 'serif' }}>{d.word}</TableCell>
+                  <TableCell sx={{ fontFamily: 'serif' }}>{pairInfo?.label ?? d.pair}</TableCell>
+                  <TableCell>{d.hasDagesh ? 'עם דגש' : 'בלי דגש'}</TableCell>
+                  <TableCell align="center">
+                    <Tooltip title="מחק">
+                      <IconButton size="small" color="error" onClick={() => onDelete(item.id)}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+            {items.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={4} sx={{ textAlign: 'center', py: 3, color: 'text.secondary' }}>
+                  אין פריטים – מוצגות ברירות המחדל מהקוד
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <TextField
+          label="מילה (עם ניקוד)"
+          size="small"
+          value={word}
+          onChange={e => setWord(e.target.value)}
+          placeholder="בּית"
+          sx={{ flex: 1, minWidth: 140 }}
+        />
+        <TextField
+          select
+          label="זוג אותיות"
+          size="small"
+          value={pair}
+          onChange={e => setPair(e.target.value as 'b' | 'k' | 'p')}
+          sx={{ width: 140 }}
+        >
+          {DAGESH_PAIRS.map(p => (
+            <MenuItem key={p.value} value={p.value} sx={{ fontFamily: 'serif', fontSize: '1.1rem' }}>
+              {p.label}
+            </MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          select
+          label="דגש"
+          size="small"
+          value={String(hasDagesh)}
+          onChange={e => setHasDagesh(e.target.value === 'true')}
+          sx={{ width: 120 }}
+        >
+          <MenuItem value="true">עם דגש</MenuItem>
+          <MenuItem value="false">בלי דגש</MenuItem>
+        </TextField>
+        <Button variant="contained" startIcon={<AddIcon />} onClick={save} disabled={saving}
+          sx={{ gap: 1, '& .MuiButton-startIcon': { margin: 0 } }}>
+          {saving ? <CircularProgress size={18} color="inherit" /> : 'הוסף'}
+        </Button>
+      </Box>
+      {err && <Alert severity="error" sx={{ mt: 1 }}>{err}</Alert>}
+    </>
+  );
+};
+
 /* ── delete confirm dialog ── */
 const DeleteDialog = ({ open, onClose, onConfirm, loading }: { open: boolean; onClose: () => void; onConfirm: () => void; loading: boolean }) => (
   <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
@@ -436,6 +548,7 @@ const GamesManager = () => {
         {tab === 3 && <HangmanPanel     items={items} onAdd={handleAdd} onDelete={setDeleteTarget} />}
         {tab === 4 && <JewishQuizPanel  items={items} onAdd={handleAdd} onDelete={setDeleteTarget} />}
         {tab === 5 && gameType && <NikudMatchPanel items={items} onDelete={setDeleteTarget} onRefresh={() => load(gameType)} />}
+        {tab === 6 && <DageshPanel items={items} onAdd={handleAdd} onDelete={setDeleteTarget} />}
       </Paper>
 
       <DeleteDialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)} onConfirm={handleDelete} loading={deleting} />

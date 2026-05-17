@@ -1,6 +1,4 @@
-import { Link } from 'react-router-dom';
-import { Box, Container, Typography, Button } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Box, Container, Typography } from '@mui/material';
 import heroImg from '../../assets/design/תמונת-רקע.jpg';
 
 const HeroSection = () => (
@@ -67,20 +65,10 @@ const HeroSection = () => (
       <Typography
         variant="body1"
         color="text.secondary"
-        sx={{ mb: 5, maxWidth: 500, mx: 'auto', fontStyle: 'italic' }}
+        sx={{ mb: 2, maxWidth: 500, mx: 'auto', fontStyle: 'italic' }}
       >
         "וְהָיָה כְּעֵץ שָׁתוּל עַל פַּלְגֵי מָיִם" – תהלים א, ג
       </Typography>
-      <Button
-        variant="contained"
-        size="large"
-        component={Link}
-        to="/products"
-        endIcon={<ArrowBackIcon />}
-        sx={{ px: 5, py: 1.5, fontSize: '1.1rem', gap: 1, '& .MuiButton-endIcon': { margin: 0 } }}
-      >
-        לחנות
-      </Button>
     </Container>
   </Box>
 );

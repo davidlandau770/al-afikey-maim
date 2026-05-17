@@ -70,6 +70,7 @@ const VideoTeaser = () => {
         onClose={() => setActiveId(null)}
         maxWidth="md"
         fullWidth
+        disableScrollLock
         PaperProps={{ sx: { bgcolor: 'black', m: { xs: 1, sm: 3 } } }}
       >
         <Box sx={{ position: 'relative', paddingTop: '56.25%' }}>

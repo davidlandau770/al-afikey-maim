@@ -26,12 +26,21 @@ const videos = [
   { title: 'המלצה מאת הרב פילו – ת"ת קול רינה', id: 'zKdPtOIxPDQ' },
 ];
 
+const desktopNavBtn = {
+  position: 'absolute' as const,
+  top: '50%',
+  transform: 'translateY(-50%)',
+  bgcolor: 'rgba(0,0,0,0.45)',
+  color: 'white',
+  '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' },
+};
+
 interface Testimonial { id: string; quote: string; name: string; role: string; }
 
 const TestimonialsPage = () => {
-  const [lightbox, setLightbox]   = useState<number | null>(null);
-  const [quotes, setQuotes]       = useState<Testimonial[]>([]);
-  const theme = useTheme();
+  const [lightbox, setLightbox] = useState<number | null>(null);
+  const [quotes, setQuotes]     = useState<Testimonial[]>([]);
+  const theme    = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
@@ -44,15 +53,6 @@ const TestimonialsPage = () => {
 
   const prev = () => setLightbox(i => (i! - 1 + images.length) % images.length);
   const next = () => setLightbox(i => (i! + 1) % images.length);
-
-  const navBtn = {
-    position: 'absolute' as const,
-    top: '50%',
-    transform: 'translateY(-50%)',
-    bgcolor: 'rgba(0,0,0,0.45)',
-    color: 'white',
-    '&:hover': { bgcolor: 'rgba(0,0,0,0.7)' },
-  };
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 4, md: 7 } }}>
@@ -97,63 +97,72 @@ const TestimonialsPage = () => {
         open={lightbox !== null}
         onClose={() => setLightbox(null)}
         maxWidth="lg"
+        fullScreen={isMobile}
+        disableScrollLock
         PaperProps={{
-          sx: {
-            bgcolor: 'transparent',
-            boxShadow: 'none',
-            overflow: 'visible',
-            m: { xs: 1.5, md: 3 },
-          },
+          sx: isMobile
+            ? { bgcolor: '#111', display: 'flex', flexDirection: 'column' }
+            : { bgcolor: 'transparent', boxShadow: 'none', overflow: 'visible', m: 3 },
         }}
       >
-        <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          {lightbox !== null && (
-            <Box
-              component="img"
-              src={images[lightbox]}
-              alt={`המלצה ${lightbox + 1}`}
-              sx={{ maxHeight: '85vh', maxWidth: '90vw', borderRadius: 2, display: 'block' }}
-            />
-          )}
+        {isMobile ? (
+          /* Mobile: full-screen black background */
+          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            {/* Close */}
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+              <IconButton onClick={() => setLightbox(null)} sx={{ color: 'white' }}>
+                <CloseIcon />
+              </IconButton>
+            </Box>
 
-          {/* Close */}
-          <IconButton
-            onClick={() => setLightbox(null)}
-            sx={{
-              ...navBtn,
-              position: 'absolute',
-              top: { xs: 8, md: -16 },
-              right: { xs: 8, md: -16 },
-              transform: 'none',
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
+            {/* Image */}
+            <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', px: 1 }}>
+              {lightbox !== null && (
+                <Box
+                  component="img"
+                  src={images[lightbox]}
+                  alt={`המלצה ${lightbox + 1}`}
+                  sx={{ maxHeight: '78vh', maxWidth: '100%', borderRadius: 1, display: 'block' }}
+                />
+              )}
+            </Box>
 
-          {/* Prev — right side in RTL */}
-          <IconButton
-            onClick={prev}
-            sx={{
-              ...navBtn,
-              right: { xs: 8, md: -52 },
-              ...(isMobile && { top: 'auto', bottom: 8, transform: 'none' }),
-            }}
-          >
-            <ArrowForwardIosIcon />
-          </IconButton>
-
-          {/* Next — left side in RTL */}
-          <IconButton
-            onClick={next}
-            sx={{
-              ...navBtn,
-              left: { xs: 8, md: -52 },
-              ...(isMobile && { top: 'auto', bottom: 8, transform: 'none' }),
-            }}
-          >
-            <ArrowBackIosNewIcon />
-          </IconButton>
-        </Box>
+            {/* Bottom navigation */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, bgcolor: 'rgba(0,0,0,0.6)' }}>
+              <IconButton onClick={prev} sx={{ color: 'white' }}>
+                <ArrowForwardIosIcon />
+              </IconButton>
+              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.65)' }}>
+                {lightbox !== null ? `${lightbox + 1} / ${images.length}` : ''}
+              </Typography>
+              <IconButton onClick={next} sx={{ color: 'white' }}>
+                <ArrowBackIosNewIcon />
+              </IconButton>
+            </Box>
+          </Box>
+        ) : (
+          /* Desktop: floating image with outside buttons */
+          <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {lightbox !== null && (
+              <Box
+                component="img"
+                src={images[lightbox]}
+                alt={`המלצה ${lightbox + 1}`}
+                sx={{ maxHeight: '85vh', maxWidth: '90vw', borderRadius: 2, display: 'block' }}
+              />
+            )}
+            <IconButton onClick={() => setLightbox(null)}
+              sx={{ ...desktopNavBtn, position: 'absolute', top: -16, right: -16, transform: 'none' }}>
+              <CloseIcon />
+            </IconButton>
+            <IconButton onClick={prev} sx={{ ...desktopNavBtn, right: -52 }}>
+              <ArrowForwardIosIcon />
+            </IconButton>
+            <IconButton onClick={next} sx={{ ...desktopNavBtn, left: -52 }}>
+              <ArrowBackIosNewIcon />
+            </IconButton>
+          </Box>
+        )}
       </Dialog>
 
       {/* Written testimonials */}
@@ -171,7 +180,7 @@ const TestimonialsPage = () => {
                     <Typography sx={{ fontSize: '3rem', color: 'primary.main', lineHeight: 1, mb: 1, opacity: 0.3 }}>
                       "
                     </Typography>
-                    <Typography variant="body1" sx={{ lineHeight: 1.85, flexGrow: 1, fontStyle: 'italic', mb: 2.5 }}>
+                    <Typography variant="body1" sx={{ lineHeight: 1.85, flexGrow: 1, fontStyle: 'italic', mb: 2.5, textAlign: 'justify' }}>
                       {t.quote}
                     </Typography>
                     <Box sx={{ borderTop: '1px solid', borderColor: 'divider', pt: 2 }}>

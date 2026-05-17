@@ -10,7 +10,7 @@ const Section = ({ title, children }: { title: string; children: React.ReactNode
 );
 
 const P = ({ children }: { children: React.ReactNode }) => (
-  <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 2, mb: 1 }}>{children}</Typography>
+  <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 2, mb: 1, textAlign: 'justify' }}>{children}</Typography>
 );
 
 const PrivacyPage = () => (

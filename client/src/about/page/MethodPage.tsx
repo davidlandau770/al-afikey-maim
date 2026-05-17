@@ -16,7 +16,7 @@ const Section = ({ title, children }: { title?: string; children: React.ReactNod
 );
 
 const P = ({ children }: { children: React.ReactNode }) => (
-  <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 2, mb: 1.5 }}>
+  <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 2, mb: 1.5, textAlign: 'justify' }}>
     {children}
   </Typography>
 );
@@ -163,7 +163,7 @@ const MethodPage = () => {
               <Typography variant="subtitle1" fontWeight={700} color="primary.dark" sx={{ mb: 0.5 }}>
                 {b.title}
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.8, textAlign: 'justify' }}>
                 {b.body}
               </Typography>
             </Paper>

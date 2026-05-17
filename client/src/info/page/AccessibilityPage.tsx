@@ -3,7 +3,7 @@ import { Box, Container, Typography, Breadcrumbs, Divider } from '@mui/material'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 
 const P = ({ children }: { children: React.ReactNode }) => (
-  <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 2, mb: 1.5 }}>{children}</Typography>
+  <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 2, mb: 1.5, textAlign: 'justify' }}>{children}</Typography>
 );
 
 const AccessibilityPage = () => (

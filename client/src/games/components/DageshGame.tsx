@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Box, Typography, Button, LinearProgress } from '@mui/material';
 
 interface Question {
   word: string;
   pair: 'b' | 'k' | 'p';
   hasDagesh: boolean;
+}
+
+interface DbItem {
+  id: string;
+  data: { word: string; pair: 'b' | 'k' | 'p'; hasDagesh: boolean };
 }
 
 const ALL_QUESTIONS: Question[] = [
@@ -40,8 +46,6 @@ const PAIRS = {
   p: { dagesh: 'פּ', plain: 'פ' },
 };
 
-const TOTAL = 12;
-
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -51,11 +55,11 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function pickQuestions(): Question[] {
+function pickQuestions(pool: Question[]): Question[] {
   const result: Question[] = [];
   for (const pair of ['b', 'k', 'p'] as const) {
-    const withDagesh = ALL_QUESTIONS.filter(q => q.pair === pair && q.hasDagesh);
-    const withoutDagesh = ALL_QUESTIONS.filter(q => q.pair === pair && !q.hasDagesh);
+    const withDagesh    = pool.filter(q => q.pair === pair && q.hasDagesh);
+    const withoutDagesh = pool.filter(q => q.pair === pair && !q.hasDagesh);
     result.push(...shuffle(withDagesh).slice(0, 2), ...shuffle(withoutDagesh).slice(0, 2));
   }
   return shuffle(result);
@@ -94,20 +98,34 @@ const Confetti = () => {
 type Feedback = 'correct' | 'wrong' | null;
 
 const DageshGame = () => {
-  const [questions, setQuestions] = useState<Question[]>(() => pickQuestions());
-  const [current,  setCurrent]   = useState(0);
-  const [score,    setScore]     = useState(0);
-  const [feedback, setFeedback]  = useState<Feedback>(null);
-  const [chosen,   setChosen]    = useState<boolean | null>(null);
-  const [answers,  setAnswers]   = useState<boolean[]>([]);
-  const [done,     setDone]      = useState(false);
-  const [confetti, setConfetti]  = useState(false);
+  const [pool,      setPool]      = useState<Question[]>(ALL_QUESTIONS);
+  const [questions, setQuestions] = useState<Question[]>(() => pickQuestions(ALL_QUESTIONS));
+  const [current,   setCurrent]   = useState(0);
+  const [score,     setScore]     = useState(0);
+  const [feedback,  setFeedback]  = useState<Feedback>(null);
+  const [chosen,    setChosen]    = useState<boolean | null>(null);
+  const [answers,   setAnswers]   = useState<boolean[]>([]);
+  const [done,      setDone]      = useState(false);
+  const [confetti,  setConfetti]  = useState(false);
 
-  const q    = questions[current];
-  const pair = PAIRS[q.pair];
+  useEffect(() => {
+    axios.get<DbItem[]>('/api/game-items/dagesh')
+      .then(({ data }) => {
+        if (data.length > 0) {
+          const qs = data.map(item => item.data);
+          setPool(qs);
+          setQuestions(pickQuestions(qs));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const total = questions.length;
+  const q     = questions[current];
+  const pair  = q ? PAIRS[q.pair] : PAIRS.b;
 
   const handleAnswer = (selectedDagesh: boolean) => {
-    if (feedback !== null) return;
+    if (feedback !== null || !q) return;
     const isCorrect  = selectedDagesh === q.hasDagesh;
     const finalScore = isCorrect ? score + 1 : score;
     setChosen(selectedDagesh);
@@ -118,9 +136,9 @@ const DageshGame = () => {
     setTimeout(() => {
       setFeedback(null);
       setChosen(null);
-      if (current + 1 >= TOTAL) {
+      if (current + 1 >= total) {
         setDone(true);
-        if (finalScore >= 9) {
+        if (finalScore >= Math.ceil(total * 0.75)) {
           setConfetti(true);
           setTimeout(() => setConfetti(false), 3800);
         }
@@ -131,7 +149,7 @@ const DageshGame = () => {
   };
 
   const restart = () => {
-    setQuestions(pickQuestions());
+    setQuestions(pickQuestions(pool));
     setCurrent(0); setScore(0); setFeedback(null);
     setChosen(null); setAnswers([]); setDone(false); setConfetti(false);
   };
@@ -141,18 +159,20 @@ const DageshGame = () => {
       <Box sx={{ textAlign: 'center', py: 4 }}>
         {confetti && <Confetti />}
         <Typography sx={{ fontSize: '3rem', mb: 1 }}>
-          {score >= 11 ? '🌟' : score >= 9 ? '🎉' : score >= 7 ? '👍' : '💪'}
+          {score === total ? '🌟' : score >= Math.ceil(total * 0.75) ? '🎉' : score >= Math.ceil(total * 0.58) ? '👍' : '💪'}
         </Typography>
         <Typography variant="h5" fontWeight={800} sx={{ mb: 0.5 }}>
-          {score} / {TOTAL} נכון
+          {score} / {total} נכון
         </Typography>
         <Typography color="text.secondary" sx={{ mb: 3 }}>
-          {score >= 11 ? 'מושלם לחלוטין!' : score >= 9 ? 'כל הכבוד!' : score >= 7 ? 'טוב מאוד, עוד קצת!' : 'תנסה שוב, אתה יכול!'}
+          {score === total ? 'מושלם לחלוטין!' : score >= Math.ceil(total * 0.75) ? 'כל הכבוד!' : score >= Math.ceil(total * 0.58) ? 'טוב מאוד, עוד קצת!' : 'תנסה שוב, אתה יכול!'}
         </Typography>
         <Button variant="contained" size="large" onClick={restart}>שחק שוב</Button>
       </Box>
     );
   }
+
+  if (!q) return null;
 
   const btnSx = (isDagesh: boolean) => {
     const isChosen  = chosen === isDagesh;
@@ -164,8 +184,8 @@ const DageshGame = () => {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       minHeight: { xs: 100, sm: 130 },
       borderRadius: 3, border: '2.5px solid',
-      borderColor: showGreen ? 'success.main' : showRed ? 'error.main' : 'divider',
-      bgcolor: showGreen ? '#F0FDF4' : showRed ? '#FEF2F2' : isDagesh ? '#F5F3FF' : '#FFFBEB',
+      borderColor: showGreen ? 'success.main' : showRed ? 'error.main' : 'grey.300',
+      bgcolor: showGreen ? '#F0FDF4' : showRed ? '#FEF2F2' : 'white',
       cursor: feedback !== null ? 'default' : 'pointer',
       transition: 'border-color .2s, background-color .2s, transform .1s',
       transform: isChosen && feedback === 'correct' ? 'scale(1.04)' : 'scale(1)',
@@ -186,12 +206,12 @@ const DageshGame = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
         <LinearProgress
           variant="determinate"
-          value={(current / TOTAL) * 100}
+          value={(current / total) * 100}
           sx={{ flex: 1, height: 8, borderRadius: 4, bgcolor: 'grey.200',
             '& .MuiLinearProgress-bar': { borderRadius: 4 } }}
         />
         <Typography variant="caption" color="text.secondary" sx={{ minWidth: 42, textAlign: 'left', fontWeight: 600 }}>
-          {current + 1} / {TOTAL}
+          {current + 1} / {total}
         </Typography>
       </Box>
 
@@ -225,7 +245,7 @@ const DageshGame = () => {
               fontSize: { xs: '3rem', sm: '4rem' },
               fontFamily: '"Frank Ruhl Libre", "David Libre", serif',
               fontWeight: 700,
-              color: isDagesh ? 'primary.dark' : 'warning.dark',
+              color: 'primary.dark',
               lineHeight: 1,
             }}>
               {isDagesh ? pair.dagesh : pair.plain}
@@ -236,7 +256,7 @@ const DageshGame = () => {
 
       {/* Progress dots */}
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2.5, gap: 0.75 }}>
-        {Array.from({ length: TOTAL }, (_, i) => (
+        {Array.from({ length: total }, (_, i) => (
           <Box key={i} sx={{
             width: i === current ? 10 : 8,
             height: i === current ? 10 : 8,

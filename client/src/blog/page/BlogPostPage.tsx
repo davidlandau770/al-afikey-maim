@@ -59,7 +59,7 @@ const BlogPostPage = () => {
       <Box
         dangerouslySetInnerHTML={{ __html: post.content }}
         sx={{
-          '& p': { lineHeight: 2, mb: 1.5, color: 'text.secondary' },
+          '& p': { lineHeight: 2, mb: 1.5, color: 'text.secondary', textAlign: 'justify' },
           '& h2': { fontSize: '1.4rem', fontWeight: 700, color: 'primary.dark', mt: 4, mb: 1.5 },
           '& h3': { fontSize: '1.15rem', fontWeight: 700, color: 'text.primary', mt: 3, mb: 1 },
           '& ul, & ol': { pr: 3, mb: 1.5, color: 'text.secondary' },
